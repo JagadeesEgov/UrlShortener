@@ -1,132 +1,49 @@
-diff --git a/core-services/egov-url-shortening-go/docker-compose.yml b/core-services/egov-url-shortening-go/docker-compose.yml
---- a/core-services/egov-url-shortening-go/docker-compose.yml
-+++ b/core-services/egov-url-shortening-go/docker-compose.yml
-@@ -0,0 +1,128 @@
-+version: '3.8'
-+
-+services:
-+  app:
-+    build: .
-+    ports:
-+      - "8091:8091"
-+    environment:
-+      # Server Configuration
-+      - SERVER_PORT=8091
-+      - SERVER_CONTEXT_PATH=/egov-url-shortening
-+      
-+      # Redis Configuration
-+      - REDIS_HOST=redis
-+      - REDIS_PORT=6379
-+      - REDIS_PASSWORD=
-+      - REDIS_DB=0
-+      
-+      # Database Configuration
-+      - DATABASE_HOST=postgres
-+      - DATABASE_PORT=5432
-+      - DATABASE_NAME=devdb
-+      - DATABASE_USERNAME=postgres
-+      - DATABASE_PASSWORD=postgres
-+      - DATABASE_ENABLED=true
-+      - DATABASE_SSL_MODE=disable
-+      
-+      # Application Configuration
-+      - APP_HOST_NAME=http://localhost:8091/
-+      - APP_STATE_LEVEL_TENANT_ID=pb
-+      - APP_IS_MULTI_INSTANCE=false
-+      - APP_IS_CENTRAL_INSTANCE=true
-+      - APP_STATE_LEVEL_TENANT_ID_LENGTH=2
-+      
-+      # HashIDs Configuration
-+      - HASHIDS_SALT=docker-development-salt
-+      - HASHIDS_MIN_LENGTH=5
-+      
-+      # Debug Configuration
-+      - GIN_MODE=debug
-+      - LOG_LEVEL=info
-+    depends_on:
-+      postgres:
-+        condition: service_healthy
-+      redis:
-+        condition: service_healthy
-+    networks:
-+      - url-shortener-network
-+    healthcheck:
-+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8091/health"]
-+      interval: 30s
-+      timeout: 10s
-+      retries: 3
-+      start_period: 40s
-+
-+  postgres:
-+    image: postgres:15-alpine
-+    environment:
-+      - POSTGRES_DB=devdb
-+      - POSTGRES_USER=postgres
-+      - POSTGRES_PASSWORD=postgres
-+    ports:
-+      - "5432:5432"
-+    volumes:
-+      - postgres_data:/var/lib/postgresql/data
-+      - ./migrations:/docker-entrypoint-initdb.d
-+    networks:
-+      - url-shortener-network
-+    healthcheck:
-+      test: ["CMD-SHELL", "pg_isready -U postgres"]
-+      interval: 10s
-+      timeout: 5s
-+      retries: 5
-+
-+  redis:
-+    image: redis:7-alpine
-+    ports:
-+      - "6379:6379"
-+    volumes:
-+      - redis_data:/data
-+    networks:
-+      - url-shortener-network
-+    healthcheck:
-+      test: ["CMD", "redis-cli", "ping"]
-+      interval: 10s
-+      timeout: 5s
-+      retries: 5
-+
-+  # Optional: Redis Commander for Redis management
-+  redis-commander:
-+    image: rediscommander/redis-commander:latest
-+    environment:
-+      - REDIS_HOSTS=local:redis:6379
-+    ports:
-+      - "8081:8081"
-+    depends_on:
-+      redis:
-+        condition: service_healthy
-+    networks:
-+      - url-shortener-network
-+    profiles:
-+      - debug
-+
-+  # Optional: pgAdmin for PostgreSQL management
-+  pgadmin:
-+    image: dpage/pgadmin4:latest
-+    environment:
-+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
-+      - PGADMIN_DEFAULT_PASSWORD=admin
-+    ports:
-+      - "8080:80"
-+    depends_on:
-+      postgres:
-+        condition: service_healthy
-+    networks:
-+      - url-shortener-network
-+    profiles:
-+      - debug
-+
-+volumes:
-+  postgres_data:
-+    driver: local
-+  redis_data:
-+    driver: local
-+
-+networks:
-+  url-shortener-network:
-+    driver: bridge
+module urlShortner
+
+go 1.23
+
+toolchain go1.24.4
+
+require (
+	github.com/gin-gonic/gin v1.9.1
+	github.com/go-redis/redis/v8 v8.11.5
+	github.com/jackc/pgx/v5 v5.5.1
+	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/sirupsen/logrus v1.9.3
+	github.com/speps/go-hashids/v2 v2.0.1
+)
+
+require (
+	github.com/bytedance/sonic v1.9.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.14.0 // indirect
+	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/leodido/go-urn v1.2.4 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	github.com/ugorji/go/codec v1.2.11 // indirect
+	golang.org/x/arch v0.3.0 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
