@@ -15,10 +15,14 @@ import (
 	"urlShortner/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	// Load environment variables from .env file
+	_ = godotenv.Load()
+	
 	// Initialize logger
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
@@ -30,9 +34,14 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
+	// Debug: Print database configuration
 	logger.WithFields(logrus.Fields{
+		"database_host":     cfg.Database.Host,
+		"database_port":     cfg.Database.Port,
+		"database_name":     cfg.Database.Name,
+		"database_username": cfg.Database.Username,
+		"database_enabled":  cfg.Database.Enabled,
 		"port":             cfg.Server.Port,
-		"database_enabled": cfg.Database.Enabled,
 		"multi_instance":   cfg.App.IsMultiInstance,
 	}).Info("Configuration loaded")
 

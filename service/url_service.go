@@ -82,6 +82,38 @@ func (s *URLService) ShortenURL(ctx context.Context, request *models.ShortenRequ
 	// Update request with sanitized URL
 	request.URL = sanitizedURL
 
+	// Check if URL already exists
+	existingID, err := s.repository.GetURLIDByURL(ctx, sanitizedURL)
+	if err == nil {
+		// URL already exists, use existing ID
+		s.log.WithFields(logrus.Fields{
+			"url": sanitizedURL,
+			"existingId": existingID,
+		}).Info("URL already exists, using existing ID")
+		
+		// Create unique ID using existing ID
+		uniqueID, err := s.hashConverter.CreateHashStringForID(existingID)
+		if err != nil {
+			return "", fmt.Errorf("failed to create hash for existing ID %d: %w", existingID, err)
+		}
+		
+		// Build shortened URL
+		shortenedURL, err := s.buildShortenedURL(uniqueID, tenantID, multiInstance)
+		if err != nil {
+			return "", fmt.Errorf("failed to build shortened URL: %w", err)
+		}
+
+		s.log.WithFields(logrus.Fields{
+			"originalUrl":  request.URL,
+			"shortenedUrl": shortenedURL,
+			"uniqueId":     uniqueID,
+			"id":           existingID,
+		}).Info("URL already existed, returning existing shortened URL")
+
+		return shortenedURL, nil
+	}
+
+	// URL doesn't exist, create new entry
 	// Get next ID
 	id, err := s.repository.IncrementID(ctx)
 	if err != nil {

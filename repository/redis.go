@@ -198,6 +198,39 @@ func (r *RedisRepository) CheckURLExists(ctx context.Context, id int64) (bool, e
 	return exists, nil
 }
 
+// GetURLIDByURL retrieves the ID for a given URL if it exists
+func (r *RedisRepository) GetURLIDByURL(ctx context.Context, url string) (int64, error) {
+	// Get all URL entries from the hash
+	allData, err := r.client.HGetAll(ctx, r.urlKey).Result()
+	if err != nil {
+		r.log.WithError(err).Error("Failed to get all URL data")
+		return 0, fmt.Errorf("failed to get all URL data: %w", err)
+	}
+
+	// Search through all entries to find matching URL
+	for key, data := range allData {
+		var request models.ShortenRequest
+		err := json.Unmarshal([]byte(data), &request)
+		if err != nil {
+			r.log.WithError(err).WithField("key", key).Warn("Failed to unmarshal URL data during search")
+			continue
+		}
+
+		if request.URL == url {
+			// Extract ID from key (format: "url:123")
+			var id int64
+			_, err := fmt.Sscanf(key, "url:%d", &id)
+			if err != nil {
+				r.log.WithError(err).WithField("key", key).Warn("Failed to parse ID from key")
+				continue
+			}
+			return id, nil
+		}
+	}
+
+	return 0, fmt.Errorf("URL not found: %s", url)
+}
+
 // HealthCheck performs a health check on the repository
 func (r *RedisRepository) HealthCheck(ctx context.Context) error {
 	// Try to ping Redis

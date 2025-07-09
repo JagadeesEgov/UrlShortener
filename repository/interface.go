@@ -25,6 +25,9 @@ type URLRepository interface {
 	// CheckURLExists checks if a URL exists for the given ID
 	CheckURLExists(ctx context.Context, id int64) (bool, error)
 	
+	// GetURLIDByURL retrieves the ID for a given URL if it exists
+	GetURLIDByURL(ctx context.Context, url string) (int64, error)
+	
 	// HealthCheck performs a health check on the repository
 	HealthCheck(ctx context.Context) error
 	

@@ -68,7 +68,7 @@ type ShortenResponse struct {
 type URLEntry struct {
 	ID        string     `json:"id" db:"id"`
 	URL       string     `json:"url" db:"url"`
-	ValidFrom *time.Time `json:"validFrom" db:"validform"`
+	ValidFrom *time.Time `json:"validFrom" db:"validfrom"`
 	ValidTo   *time.Time `json:"validTo" db:"validto"`
 	CreatedAt time.Time  `json:"createdAt" db:"created_at"`
 	UpdatedAt time.Time  `json:"updatedAt" db:"updated_at"`

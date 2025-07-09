@@ -94,9 +94,12 @@ func (p *PostgresRepository) SaveURL(ctx context.Context, key string, request *m
 	}
 
 	// Extract ID from key (format: "url:123")
-	var id string
+	var id int64
 	if len(key) > 4 && key[:4] == "url:" {
-		id = key[4:]
+		_, err := fmt.Sscanf(key[4:], "%d", &id)
+		if err != nil {
+			return fmt.Errorf("invalid key format: %s", key)
+		}
 	} else {
 		return fmt.Errorf("invalid key format: %s", key)
 	}
@@ -112,10 +115,10 @@ func (p *PostgresRepository) SaveURL(ctx context.Context, key string, request *m
 
 	// Insert or update the URL entry
 	query := `
-		INSERT INTO eg_url_shortener (id, url, validform, validto) 
+		INSERT INTO eg_url_shortener (id, url, validfrom, validto) 
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id) 
-		DO UPDATE SET url = $2, validform = $3, validto = $4`
+		DO UPDATE SET url = $2, validfrom = $3, validto = $4`
 
 	_, err := p.db.Exec(ctx, query, id, request.URL, validFromMs, validToMs)
 	if err != nil {
@@ -158,8 +161,8 @@ func (p *PostgresRepository) GetURLDetails(ctx context.Context, id int64) (*mode
 	var url string
 	var validFrom, validTo sql.NullInt64
 	
-	query := "SELECT url, validform, validto FROM eg_url_shortener WHERE id = $1"
-	err := p.db.QueryRow(ctx, query, fmt.Sprintf("%d", id)).Scan(&url, &validFrom, &validTo)
+	query := "SELECT url, validfrom, validto FROM eg_url_shortener WHERE id = $1"
+	err := p.db.QueryRow(ctx, query, id).Scan(&url, &validFrom, &validTo)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			p.log.WithField("id", id).Debug("URL not found")
@@ -193,7 +196,7 @@ func (p *PostgresRepository) GetURLDetails(ctx context.Context, id int64) (*mode
 // DeleteURL deletes a URL by ID
 func (p *PostgresRepository) DeleteURL(ctx context.Context, id int64) error {
 	query := "DELETE FROM eg_url_shortener WHERE id = $1"
-	result, err := p.db.Exec(ctx, query, fmt.Sprintf("%d", id))
+	result, err := p.db.Exec(ctx, query, id)
 	if err != nil {
 		p.log.WithError(err).WithField("id", id).Error("Failed to delete URL")
 		return fmt.Errorf("failed to delete URL: %w", err)
@@ -212,13 +215,28 @@ func (p *PostgresRepository) DeleteURL(ctx context.Context, id int64) error {
 func (p *PostgresRepository) CheckURLExists(ctx context.Context, id int64) (bool, error) {
 	var exists bool
 	query := "SELECT EXISTS(SELECT 1 FROM eg_url_shortener WHERE id = $1)"
-	err := p.db.QueryRow(ctx, query, fmt.Sprintf("%d", id)).Scan(&exists)
+	err := p.db.QueryRow(ctx, query, id).Scan(&exists)
 	if err != nil {
 		p.log.WithError(err).WithField("id", id).Error("Failed to check URL existence")
 		return false, fmt.Errorf("failed to check URL existence: %w", err)
 	}
 
 	return exists, nil
+}
+
+// GetURLIDByURL retrieves the ID for a given URL if it exists
+func (p *PostgresRepository) GetURLIDByURL(ctx context.Context, url string) (int64, error) {
+	var id int64
+	query := "SELECT id FROM eg_url_shortener WHERE url = $1 LIMIT 1"
+	err := p.db.QueryRow(ctx, query, url).Scan(&id)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return 0, fmt.Errorf("URL not found: %s", url)
+		}
+		p.log.WithError(err).WithField("url", url).Error("Failed to get URL ID")
+		return 0, fmt.Errorf("failed to get URL ID: %w", err)
+	}
+	return id, nil
 }
 
 // HealthCheck performs a health check on the repository
