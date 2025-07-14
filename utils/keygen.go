@@ -1,20 +1,40 @@
 package utils
 
 import (
-	"crypto/rand"
 	"math/big"
+	"strings"
+
+	"github.com/google/uuid"
 )
 
-const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const base62Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+func base62Encode(b []byte) string {
+	num := new(big.Int).SetBytes(b)
+	if num.Cmp(big.NewInt(0)) == 0 {
+		return string(base62Alphabet[0])
+	}
+	var sb strings.Builder
+	for num.Cmp(big.NewInt(0)) > 0 {
+		mod := new(big.Int)
+		num.DivMod(num, big.NewInt(62), mod)
+		sb.WriteByte(base62Alphabet[mod.Int64()])
+	}
+	// Reverse the string
+	runes := []rune(sb.String())
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
+}
 
 func GenerateShortKey(length int) (string, error) {
-	key := make([]byte, length)
-	for i := range key {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphabet))))
-		if err != nil {
-			return "", err
+	for {
+		u := uuid.New()
+		encoded := base62Encode(u[:])
+		if len(encoded) >= length {
+			return encoded[:length], nil
 		}
-		key[i] = alphabet[n.Int64()]
+		// If for some reason the encoding is too short, try again
 	}
-	return string(key), nil
 } 

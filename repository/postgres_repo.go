@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 	"urlShortner/models"
 	"urlShortner/utils"
 
@@ -36,6 +37,18 @@ func getenv(key, fallback string) string {
 	return v
 }
 
+func getMinLength() int {
+	minLenStr := os.Getenv("MIN_LENGTH")
+	if minLenStr == "" {
+		return 6
+	}
+	minLen, err := strconv.Atoi(minLenStr)
+	if err != nil || minLen < 1 {
+		return 6
+	}
+	return minLen
+}
+
 // Get or create a short key for a long URL
 func (p *PostgresRepository) GetOrCreateShortKey(req models.ShortenRequest) (string, error) {
 	// 1. Check if URL already exists
@@ -50,8 +63,9 @@ func (p *PostgresRepository) GetOrCreateShortKey(req models.ShortenRequest) (str
 
 	// 2. Generate unique short key
 	var shortKey string
+	minLen := getMinLength()
 	for {
-		shortKey, err = utils.GenerateShortKey(4)
+		shortKey, err = utils.GenerateShortKey(minLen)
 		if err != nil {
 			return "", err
 		}
