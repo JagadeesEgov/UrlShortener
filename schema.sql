@@ -2,16 +2,14 @@
 -- This replaces all previous schema files
 
 -- Drop existing table and sequence if they exist
-DROP TABLE IF EXISTS eg_url_shortener CASCADE;
-DROP SEQUENCE IF EXISTS eg_url_shorter_id;
+DROP TABLE IF EXISTS eg_url_shortener;
 
 -- Create sequence for auto-incrementing IDs
-CREATE SEQUENCE eg_url_shorter_id START 1;
 
 -- Create the URL shortener table with correct schema
 CREATE TABLE eg_url_shortener (
-    id BIGINT PRIMARY KEY DEFAULT nextval('eg_url_shorter_id'),
-    url VARCHAR(2048) NOT NULL,
+    short_key VARCHAR(4) PRIMARY KEY,
+    url VARCHAR(2048) NOT NULL UNIQUE,
     validfrom BIGINT,
     validto BIGINT
 );
