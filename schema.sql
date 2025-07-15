@@ -1,8 +1,7 @@
 -- Clean URL Shortener Schema
 -- This replaces all previous schema files
 
--- Drop existing table and sequence if they exist
-DROP TABLE IF EXISTS eg_url_shortener;
+
 
 -- Create sequence for auto-incrementing IDs
 

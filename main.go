@@ -15,7 +15,7 @@ import (
 func main() {
 	_ = godotenv.Load()
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Logger(), gin.Recovery()) 
 
 	// Always use Postgres repository
 	pgRepo, err := repository.NewPostgresRepository()

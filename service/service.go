@@ -13,10 +13,10 @@ import (
 )
 
 type URLConverterService struct {
-	repo *repository.PostgresRepository
+	repo repository.URLRepository
 }
 
-func NewURLConverterService(repo *repository.PostgresRepository) *URLConverterService {
+func NewURLConverterService(repo repository.URLRepository) *URLConverterService {
 	return &URLConverterService{repo: repo}
 }
 

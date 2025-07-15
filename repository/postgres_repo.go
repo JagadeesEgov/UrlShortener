@@ -40,7 +40,7 @@ func getenv(key, fallback string) string {
 func getMinLength() int {
 	minLenStr := os.Getenv("MIN_LENGTH")
 	if minLenStr == "" {
-		return 6
+		return 4
 	}
 	minLen, err := strconv.Atoi(minLenStr)
 	if err != nil || minLen < 1 {
@@ -94,4 +94,8 @@ func (p *PostgresRepository) GetURL(shortKey string) (string, error) {
 		return "", err
 	}
 	return url, nil
+}
+
+func (p *PostgresRepository) DB() *sql.DB {
+	return p.db
 }
