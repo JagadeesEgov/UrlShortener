@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"urlShortner/repository"
-	"urlShortner/service"
+	"urlShortner/internal/repository"
+	"urlShortner/internal/service"
 
 	"github.com/joho/godotenv"
 

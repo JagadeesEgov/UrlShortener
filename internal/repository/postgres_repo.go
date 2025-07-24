@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"urlShortner/models"
-	"urlShortner/utils"
+	"urlShortner/internal/models"
+	"urlShortner/internal/utils"
 
 	_ "github.com/lib/pq"
 )
@@ -26,6 +26,21 @@ func NewPostgresRepository() (*PostgresRepository, error) {
 	if err != nil {
 		return nil, err
 	}
+	var exists bool
+    err = db.QueryRow("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'eg_url_shortener')").Scan(&exists)
+    if err != nil {
+        return nil, err
+    }
+    if !exists {
+        schema, err := utils.ReadFileAsString("migrations/create_schema_up.sql")
+        if err != nil {
+            return nil, err
+        }
+		 _, err = db.Exec(schema)
+        if err != nil {
+            return nil, err
+        }
+    }
 	return &PostgresRepository{db: db}, nil
 }
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"urlShortner/models"
+	"urlShortner/internal/models"
 
 	"github.com/go-redis/redis/v8"
 	"golang.org/x/net/context"

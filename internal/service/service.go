@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"urlShortner/models"
-	"urlShortner/repository"
-	"urlShortner/utils"
+	"urlShortner/internal/models"
+	"urlShortner/internal/repository"
+	"urlShortner/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

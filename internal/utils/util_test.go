@@ -2,7 +2,7 @@ package utils_test
 
 import (
 	"testing"
-	"urlShortner/utils"
+	"urlShortner/internal/utils"
 )
 func TestValidateURL(t *testing.T){
 	test := []struct{

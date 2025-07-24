@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/url"
+	"os"
 	"regexp"
 )
 
@@ -14,3 +15,10 @@ func ValidateURL(u string) bool {
 	_, err := url.ParseRequestURI(u)
 	return err == nil
 } 
+func ReadFileAsString(path string) (string, error) {
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return "", err
+    }
+    return string(data), nil
+}

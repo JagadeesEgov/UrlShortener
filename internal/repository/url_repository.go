@@ -1,6 +1,6 @@
 package repository
 
-import "urlShortner/models"
+import "urlShortner/internal/models"
 
 type URLRepository interface {
 	GetOrCreateShortKey(req models.ShortenRequest) (string, error)

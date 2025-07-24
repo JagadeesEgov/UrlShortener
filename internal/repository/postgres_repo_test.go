@@ -2,8 +2,8 @@ package repository_test
 
 import (
 	"testing"
-	"urlShortner/models"
-	"urlShortner/repository"
+	"urlShortner/internal/models"
+	"urlShortner/internal/repository"
 
 	"github.com/stretchr/testify/assert"
 )

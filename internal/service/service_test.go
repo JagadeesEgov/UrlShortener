@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"urlShortner/models"
-	"urlShortner/service"
+	"urlShortner/internal/models"
+	"urlShortner/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
