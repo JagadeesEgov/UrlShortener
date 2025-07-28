@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 	"urlShortner/internal/models"
 	"urlShortner/internal/utils"
 
@@ -15,34 +16,40 @@ type PostgresRepository struct {
 	db *sql.DB
 }
 
+
 func NewPostgresRepository() (*PostgresRepository, error) {
-	host := getenv("DATABASE_HOST", "localhost")
-	port := getenv("DATABASE_PORT", "5432")
-	name := getenv("DATABASE_NAME", "devdb")
-	user := getenv("DATABASE_USERNAME", "postgres")
-	pass := getenv("DATABASE_PASSWORD", "postgres")
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, pass, host, port, name)
-	db, err := sql.Open("postgres", dsn)
-	if err != nil {
-		return nil, err
-	}
-	var exists bool
-    err = db.QueryRow("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'eg_url_shortener')").Scan(&exists)
+    dsn := fmt.Sprintf(
+        "postgres://%s:%s@%s:%s/%s?sslmode=disable",
+        getenv("DATABASE_USERNAME", "postgres"),
+        getenv("DATABASE_PASSWORD", "postgres"),
+        getenv("DATABASE_HOST", "localhost"),
+        getenv("DATABASE_PORT", "5432"),
+        getenv("DATABASE_NAME", "devdb"),
+    )
+
+    var db *sql.DB
+    var err error
+
+    // Retry loop (max 10 attempts with 2s interval)
+    for i := 0; i < 10; i++ {
+        db, err = sql.Open("postgres", dsn)
+        if err == nil {
+            if pingErr := db.Ping(); pingErr == nil {
+                break
+            }
+        }
+        fmt.Println("Waiting for DB to be ready...")
+        time.Sleep(2 * time.Second)
+    }
+
     if err != nil {
-        return nil, err
+        return nil, fmt.Errorf("failed to connect to DB after retries: %w", err)
     }
-    if !exists {
-        schema, err := utils.ReadFileAsString("migrations/create_schema_up.sql")
-        if err != nil {
-            return nil, err
-        }
-		 _, err = db.Exec(schema)
-        if err != nil {
-            return nil, err
-        }
-    }
-	return &PostgresRepository{db: db}, nil
+
+    // schema setup ...
+    return &PostgresRepository{db: db}, nil
 }
+
 
 func getenv(key, fallback string) string {
 	v := os.Getenv(key)

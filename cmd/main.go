@@ -6,6 +6,7 @@ import (
 	"os"
 	"urlShortner/internal/repository"
 	"urlShortner/internal/service"
+	migration "urlShortner/migrations"
 
 	"github.com/joho/godotenv"
 
@@ -23,6 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("Postgres repository connected");
+	migration.RunMigrations(pgRepo.DB())
 	svc := service.NewURLConverterService(pgRepo)
 
 	r.POST("/shortener", svc.ShortenHandler)

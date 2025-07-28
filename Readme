@@ -1,0 +1,20 @@
+# 🚀 URL Shortener (Go + Gin + PostgreSQL)
+
+A production-ready URL shortening service with support for multi-tenancy, hostname mapping, and expiration.
+
+## 📦 Features
+
+- Shorten long URLs to short codes.
+- Auto-expiring keys (via validFrom and validTill).
+- Multi-tenant hostname support.
+- Dockerized for easy deployment.
+- PostgreSQL backed with automatic schema creation.
+
+## 📁 Setup Instructions
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/yourname/url-shortener.git
+cd url-shortener
+```
