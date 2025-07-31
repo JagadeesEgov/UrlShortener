@@ -34,7 +34,7 @@ func (s *URLConverterService) ShortenHandler(c *gin.Context) {
 		return
 	}
 
-	// 🧠 Read flags
+	//  Read flags
 	multiInstance := os.Getenv("MULTI_INSTANCE") == "true"
 	stateTenantID := os.Getenv("STATE_LEVEL_TENANT_ID")
 	hostName := os.Getenv("HOST_NAME")
@@ -71,11 +71,11 @@ func (s *URLConverterService) ShortenHandler(c *gin.Context) {
 		tenantID = stateTenantID // fallback
 	}
 
-	// 💡 Normalize host and context path
+	// Normalize host and context path
 	hostName = strings.TrimRight(hostName, "/")
 	contextPath := strings.Trim(os.Getenv("SERVER_CONTEXT_PATH"), "/")
 
-	// 🔐 Short key generation stays same
+	// Short key generation 
 	shortKey, err := s.repo.GetOrCreateShortKey(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
