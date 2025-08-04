@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS eg_url_shortener CASCADE;

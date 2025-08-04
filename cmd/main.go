@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	migration "urlShortner/internal/migrations"
 	"urlShortner/internal/repository"
 	"urlShortner/internal/service"
-	migration "urlShortner/migrations"
 
 	"github.com/joho/godotenv"
 
