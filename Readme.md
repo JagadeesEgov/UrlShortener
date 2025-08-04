@@ -15,6 +15,8 @@ A production-ready URL shortening service with support for multi-tenancy, hostna
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourname/url-shortener.git
-cd url-shortener
+git clone https://github.com/JagadeesEgov/UrlShortener.git
+cd urlShortener
+cp .env.example .env
+docker compose up --build
 ```
